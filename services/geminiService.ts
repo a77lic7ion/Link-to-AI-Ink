@@ -20,7 +20,9 @@ export async function generateInfographic(
   fileTree: RepoFileTree[], 
   style: string, 
   is3D: boolean = false,
-  language: string = "English"
+  language: string = "English",
+  customTitle?: string,
+  extraInstructions?: string
 ): Promise<string | null> {
   const ai = getAiClient();
   // Summarize architecture for the image prompt
@@ -60,6 +62,9 @@ export async function generateInfographic(
       dimensionPrompt = "Perspective: Clean 2D flat diagrammatic view straight-on. No 3D effects.";
   }
 
+  const titleToUse = customTitle || `${repoName} Data Flow`;
+  const additionalContext = extraInstructions ? `ADDITIONAL REFINEMENT INSTRUCTIONS: ${extraInstructions}` : "";
+
   const baseStylePrompt = `
   STRICT VISUAL STYLE GUIDELINES:
   ${styleGuidelines}
@@ -67,6 +72,7 @@ export async function generateInfographic(
   - CENTRAL CONTAINER: Group core logic inside a clearly defined central area.
   - ICONS: Use relevant technical icons (databases, servers, code files, users).
   - TYPOGRAPHY: Highly readable technical font. Text MUST be in ${language}.
+  ${additionalContext}
   `;
 
   const prompt = `Create a highly detailed technical logical data flow diagram infographic for GitHub repository : "${repoName}".
@@ -77,7 +83,7 @@ export async function generateInfographic(
   Repository Context: ${limitedTree}...
   
   Diagram Content Requirements:
-  1. Title exactly: "${repoName} Data Flow" (Translated to ${language} if not English)
+  1. Title exactly: "${titleToUse}" (Translated to ${language} if not English)
   2. Visually map the likely data flow based on the provided file structure.
   3. Ensure the "Input -> Processing -> Output" structure is clear.
   4. Add short, clear text labels to connecting arrows indicating data type (e.g., "JSON", "Auth Token").
@@ -85,15 +91,11 @@ export async function generateInfographic(
   `;
 
   try {
-    // Use gemini-2.5-flash-image (Nano Banana) for image generation
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [{ text: prompt }],
       },
-      // responseModalities is not needed for flash-image as it infers from intent, 
-      // but if supported, fine. However, flash-image returns standard content parts.
-      // We rely on standard iteration.
     });
 
     const parts = response.candidates?.[0]?.content?.parts;
@@ -113,7 +115,6 @@ export async function generateInfographic(
 
 export async function askRepoQuestion(question: string, infographicBase64: string, fileTree: RepoFileTree[]): Promise<string> {
   const ai = getAiClient();
-  // Provide context about the file structure to supplement the image
   const limitedTree = fileTree.slice(0, 300).map(f => f.path).join('\n');
   
   const prompt = `You are a senior software architect reviewing a project.
@@ -192,7 +193,9 @@ export async function generateArticleInfographic(
   url: string, 
   style: string, 
   onProgress?: (stage: string) => void,
-  language: string = "English"
+  language: string = "English",
+  customTitle?: string,
+  extraInstructions?: string
 ): Promise<InfographicResult> {
     const ai = getAiClient();
     // PHASE 1: Content Understanding & Structural Breakdown (The "Planner")
@@ -216,30 +219,25 @@ export async function generateArticleInfographic(
         
         Keep the output concise and focused purely on what should be ON the infographic. Ensure all content is in ${language}.`;
 
-        // Switch to 'gemini-2.5-flash' for text reasoning/research.
-        // gemini-2.5-flash supports Google Search via tools.
         const analysisResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: analysisPrompt,
             config: {
                 tools: [{ googleSearch: {} }],
-                // Do NOT set responseMimeType or responseSchema when using tools
             }
         });
         structuralSummary = analysisResponse.text || "";
 
-        // Extract citations from grounding metadata with Titles
         const chunks = analysisResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
         if (chunks) {
             chunks.forEach((chunk: any) => {
                 if (chunk.web?.uri) {
                     citations.push({
                         uri: chunk.web.uri,
-                        title: chunk.web.title || "" // Default to empty, handle in UI
+                        title: chunk.web.title || ""
                     });
                 }
             });
-            // Deduplicate citations based on URI
             const uniqueCitations = new Map();
             citations.forEach(c => uniqueCitations.set(c.uri, c));
             citations = Array.from(uniqueCitations.values());
@@ -268,7 +266,6 @@ export async function generateArticleInfographic(
             styleGuidelines = `STYLE: Modern, flat vector illustration style. Clean, professional, and editorial (like a high-end tech magazine). Cohesive, mature color palette.`;
             break;
         default:
-            // Custom style logic
              if (style && style !== "Custom") {
                 styleGuidelines = `STYLE: Custom User Style: "${style}".`;
              } else {
@@ -276,6 +273,9 @@ export async function generateArticleInfographic(
              }
             break;
     }
+
+    const titleOverride = customTitle ? `OVERRIDE TITLE WITH: "${customTitle}"` : "";
+    const extraRefinement = extraInstructions ? `ADDITIONAL FOCUS/INSTRUCTIONS: ${extraInstructions}` : "";
 
     const imagePrompt = `Create a professional, high-quality educational infographic based strictly on this structured content plan:
 
@@ -288,17 +288,16 @@ export async function generateArticleInfographic(
     - TYPOGRAPHY: Clean, highly readable sans-serif fonts. The "INFOGRAPHIC HEADLINE" must be prominent at the top.
     - CONTENT: Use the actual text from "KEY TAKEAWAYS" in the image. Do not use placeholder text like Lorem Ipsum.
     - GOAL: The image must be informative and readable as a standalone graphic.
+    ${titleOverride}
+    ${extraRefinement}
     `;
 
     try {
-        // Use gemini-2.5-flash-image for generation
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image',
             contents: {
                 parts: [{ text: imagePrompt }],
             },
-            // config for image model does not strictly require responseModalities: [Modality.IMAGE] 
-            // but we can add it if needed. However, flash-image works best with simple prompts.
         });
 
         let imageData = null;

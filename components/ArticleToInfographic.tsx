@@ -5,15 +5,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { generateArticleInfographic } from '../services/geminiService';
-import { Citation, ArticleHistoryItem } from '../types';
-import { Link, Loader2, Download, Sparkles, AlertCircle, Palette, Globe, ExternalLink, BookOpen, Clock, Maximize } from 'lucide-react';
+import { Citation, ArticleHistoryItem, InitialConfig } from '../types';
+import { Link, Loader2, Download, Sparkles, AlertCircle, Palette, Globe, ExternalLink, BookOpen, Clock, Maximize, Sliders, RefreshCw, Type, Target } from 'lucide-react';
 import { LoadingState } from './LoadingState';
 import ImageViewer from './ImageViewer';
 
 interface ArticleToInfographicProps {
     history: ArticleHistoryItem[];
     onAddToHistory: (item: ArticleHistoryItem) => void;
-    initialUrl?: string;
+    initialConfig?: InitialConfig | null;
 }
 
 const SKETCH_STYLES = [
@@ -42,7 +42,7 @@ const LANGUAGES = [
   { label: "Chinese (China)", value: "Chinese" },
 ];
 
-const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, onAddToHistory, initialUrl }) => {
+const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, onAddToHistory, initialConfig }) => {
   const [urlInput, setUrlInput] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(SKETCH_STYLES[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0].value);
@@ -53,24 +53,43 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState('');
   
+  // Refinement State
+  const [refinementPrompt, setRefinementPrompt] = useState('');
+  const [customName, setCustomName] = useState('');
+  
   // Viewer State
   const [fullScreenImage, setFullScreenImage] = useState<{src: string, alt: string} | null>(null);
 
-  // Auto-run if initialUrl is present
+  // Auto-run if initialConfig is present
   useEffect(() => {
-    if (initialUrl && !imageData && !loading) {
-        setUrlInput(initialUrl);
+    if (initialConfig && !imageData && !loading) {
+        setUrlInput(initialConfig.url);
+        if (initialConfig.customName) setCustomName(initialConfig.customName);
+        if (initialConfig.style) {
+             if (SKETCH_STYLES.includes(initialConfig.style)) {
+                 setSelectedStyle(initialConfig.style);
+             } else {
+                 setSelectedStyle('Custom');
+                 setCustomStyle(initialConfig.style);
+             }
+        }
+        if (initialConfig.focus) {
+            setRefinementPrompt(initialConfig.focus);
+        }
+
         // Delay slightly to ensure render, then trigger
         setTimeout(() => {
              const form = document.getElementById('article-form') as HTMLFormElement;
              if (form) form.requestSubmit();
         }, 100);
     }
-  }, [initialUrl]);
+  }, [initialConfig]);
 
   const addToHistory = (url: string, image: string, cites: Citation[]) => {
-      let title = url;
-      try { title = new URL(url).hostname; } catch(e) {}
+      let title = customName || url;
+      if (!customName) {
+        try { title = new URL(url).hostname; } catch(e) {}
+      }
       
       const newItem: ArticleHistoryItem = {
           id: Date.now().toString(),
@@ -88,6 +107,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
       setUrlInput(item.url);
       setImageData(item.imageData);
       setCitations(item.citations);
+      setCustomName(item.title);
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -105,9 +125,14 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
 
     try {
       const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
-      const { imageData: resultImage, citations: resultCitations } = await generateArticleInfographic(urlInput, styleToUse, (stage) => {
-          setLoadingStage(stage);
-      }, selectedLanguage);
+      const { imageData: resultImage, citations: resultCitations } = await generateArticleInfographic(
+          urlInput, 
+          styleToUse, 
+          (stage) => { setLoadingStage(stage); }, 
+          selectedLanguage,
+          customName,
+          refinementPrompt
+      );
       
       if (resultImage) {
           setImageData(resultImage);
@@ -164,6 +189,20 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                         <Sparkles className="w-5 h-5 opacity-50" />
                     </div>
                 </div>
+            </div>
+            
+            {/* Custom Business Name */}
+            <div className="space-y-4">
+                <label className="text-xs text-emerald-400 font-mono tracking-wider flex items-center gap-2">
+                    <Type className="w-4 h-4" /> TITLE_OVERRIDE
+                </label>
+                <input
+                    type="text"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="e.g. Q1 2025 Financial Report Summary"
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500/50 font-mono transition-all"
+                />
             </div>
 
             {/* Style & Language Controls */}
@@ -223,6 +262,20 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                     </div>
                  </div>
             </div>
+            
+            {/* Refinement Prompt for initial generation */}
+            <div className="space-y-4">
+                <label className="text-xs text-emerald-400 font-mono tracking-wider flex items-center gap-2">
+                    <Target className="w-4 h-4" /> FOCUS / EXTRA CONTEXT
+                </label>
+                <input
+                    type="text"
+                    value={refinementPrompt}
+                    onChange={(e) => setRefinementPrompt(e.target.value)}
+                    placeholder="e.g. Focus on the pricing structure and key benefits"
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500/50 font-mono transition-all"
+                />
+            </div>
 
             <button
                 type="submit"
@@ -248,7 +301,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
 
       {/* Result Section */}
       {imageData && !loading && (
-        <div className="glass-panel rounded-3xl p-1.5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="glass-panel rounded-3xl p-1.5 animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-4">
             <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 mb-1.5 bg-slate-950/30 rounded-t-2xl">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
                   <Sparkles className="w-4 h-4 text-emerald-400" /> Generated_Result
@@ -270,6 +323,27 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                  {selectedStyle === "Dark Mode Tech" && <div className="absolute inset-0 bg-slate-950 pointer-events-none mix-blend-multiply" />}
                 <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <img src={`data:image/png;base64,${imageData}`} alt="Generated Infographic" className="w-full h-auto object-contain max-h-[800px] mx-auto relative z-10" />
+            </div>
+
+            {/* Refinement Station */}
+            <div className="bg-slate-900/50 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 mx-4 border border-white/5">
+                <div className="flex items-center gap-2 text-slate-400 shrink-0">
+                    <Sliders className="w-5 h-5" />
+                    <span className="text-xs font-mono uppercase tracking-wider">Refine_Output</span>
+                </div>
+                <input 
+                    type="text" 
+                    value={refinementPrompt}
+                    onChange={(e) => setRefinementPrompt(e.target.value)}
+                    placeholder="e.g. 'Use more vibrant colors' or 'Simplify the text'"
+                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500/50 font-mono"
+                />
+                <button 
+                    onClick={handleGenerate}
+                    className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-emerald shrink-0"
+                >
+                    <RefreshCw className="w-3 h-3" /> Regenerate
+                </button>
             </div>
 
              {/* Featured Citations Section */}

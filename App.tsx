@@ -8,7 +8,7 @@ import RepoAnalyzer from './components/RepoAnalyzer';
 import ArticleToInfographic from './components/ArticleToInfographic';
 import Home from './components/Home';
 import IntroAnimation from './components/IntroAnimation';
-import { ViewMode, RepoHistoryItem, ArticleHistoryItem } from './types';
+import { ViewMode, RepoHistoryItem, ArticleHistoryItem, InitialConfig } from './types';
 import { Github, PenTool, GitBranch, FileText, Home as HomeIcon } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -18,7 +18,9 @@ const App: React.FC = () => {
   // Lifted History State for Persistence
   const [repoHistory, setRepoHistory] = useState<RepoHistoryItem[]>([]);
   const [articleHistory, setArticleHistory] = useState<ArticleHistoryItem[]>([]);
-  const [targetUrl, setTargetUrl] = useState<string>('');
+  
+  // Initial Config State passed from Home
+  const [initialConfig, setInitialConfig] = useState<InitialConfig | null>(null);
 
   const handleIntroComplete = () => {
     setShowIntro(false);
@@ -26,13 +28,13 @@ const App: React.FC = () => {
 
   const handleNavigate = (mode: ViewMode) => {
     setCurrentView(mode);
-    setTargetUrl(''); // Clear target on manual nav
+    setInitialConfig(null); // Clear config on manual nav
   };
 
-  const handleUrlSubmit = (url: string) => {
-    setTargetUrl(url);
+  const handleUrlSubmit = (config: InitialConfig) => {
+    setInitialConfig(config);
     // Basic detection for GitHub URLs
-    if (url.includes('github.com') && url.split('/').length >= 4) {
+    if (config.url.includes('github.com') && config.url.split('/').length >= 4) {
       setCurrentView(ViewMode.REPO_ANALYZER);
     } else {
       setCurrentView(ViewMode.ARTICLE_INFOGRAPHIC);
@@ -129,7 +131,7 @@ const App: React.FC = () => {
                         onNavigate={handleNavigate} 
                         history={repoHistory} 
                         onAddToHistory={handleAddRepoHistory}
-                        initialUrl={targetUrl}
+                        initialConfig={initialConfig}
                     />
                 </div>
             )}
@@ -138,7 +140,7 @@ const App: React.FC = () => {
                     <ArticleToInfographic 
                         history={articleHistory} 
                         onAddToHistory={handleAddArticleHistory}
-                        initialUrl={targetUrl}
+                        initialConfig={initialConfig}
                     />
                 </div>
             )}

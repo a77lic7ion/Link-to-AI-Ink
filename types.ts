@@ -11,6 +11,13 @@ export enum ViewMode {
   ARTICLE_INFOGRAPHIC = 'ARTICLE_INFOGRAPHIC'
 }
 
+export interface InitialConfig {
+    url: string;
+    customName?: string;
+    style?: string;
+    focus?: string;
+}
+
 export interface D3Node extends SimulationNodeDatum {
   id: string;
   group: number;

@@ -4,21 +4,32 @@
 */
 
 import React, { useState } from 'react';
-import { ViewMode } from '../types';
-import { Sparkles, Link, ArrowRight, Search, Zap, Code2, Globe } from 'lucide-react';
+import { ViewMode, InitialConfig } from '../types';
+import { Sparkles, Link, ArrowRight, Search, Zap, Code2, Globe, Type, Palette, Target } from 'lucide-react';
 
 interface HomeProps {
   onNavigate: (mode: ViewMode) => void;
-  onUrlSubmit: (url: string) => void;
+  onUrlSubmit: (config: InitialConfig) => void;
 }
+
+const STYLES = ["Modern Data Flow", "Neon Cyberpunk", "Corporate Minimal", "Hand-Drawn Blueprint"];
 
 const Home: React.FC<HomeProps> = ({ onNavigate, onUrlSubmit }) => {
   const [inputUrl, setInputUrl] = useState('');
+  const [customName, setCustomName] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState(STYLES[0]);
+  const [focusArea, setFocusArea] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputUrl.trim()) {
-      onUrlSubmit(inputUrl.trim());
+      onUrlSubmit({
+          url: inputUrl.trim(),
+          customName: customName.trim(),
+          style: selectedStyle,
+          focus: focusArea.trim()
+      });
     }
   };
 
@@ -53,8 +64,9 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onUrlSubmit }) => {
             {/* Glow effect behind input */}
             <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
             
-            <form onSubmit={handleSubmit} className="relative">
-                <div className="relative bg-[#050505] rounded-xl p-2 flex items-center ring-1 ring-white/10 focus-within:ring-violet-500/50 transition-all shadow-2xl">
+            <form onSubmit={handleSubmit} className="relative space-y-2">
+                {/* Main URL Input */}
+                <div className="relative bg-[#050505] rounded-xl p-2 flex items-center ring-1 ring-white/10 focus-within:ring-violet-500/50 transition-all shadow-2xl z-20">
                     <div className="pl-5 pr-4 text-slate-500">
                         <Link className="w-5 h-5" />
                     </div>
@@ -72,6 +84,53 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onUrlSubmit }) => {
                     >
                         INITIALIZE <ArrowRight className="w-3 h-3" />
                     </button>
+                </div>
+
+                {/* Additional Controls Panel */}
+                <div className="bg-[#080808]/90 backdrop-blur-xl border border-white/5 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2">
+                    
+                    {/* Business/Repo Name */}
+                    <div className="space-y-2">
+                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                            <Type className="w-3 h-3" /> Project / Business Name
+                         </label>
+                         <input 
+                            type="text"
+                            value={customName}
+                            onChange={(e) => setCustomName(e.target.value)}
+                            placeholder="e.g. Savage Mugs Inc."
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-700 focus:ring-1 focus:ring-violet-500/50 font-mono"
+                         />
+                    </div>
+
+                    {/* Style Selection */}
+                    <div className="space-y-2">
+                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                            <Palette className="w-3 h-3" /> Visual Style
+                         </label>
+                         <select
+                            value={selectedStyle}
+                            onChange={(e) => setSelectedStyle(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:ring-1 focus:ring-violet-500/50 font-mono appearance-none"
+                         >
+                            {STYLES.map(s => <option key={s} value={s}>{s}</option>)}
+                            <option value="Custom">Custom</option>
+                         </select>
+                    </div>
+
+                    {/* Focus / Extra Context */}
+                    <div className="space-y-2">
+                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                            <Target className="w-3 h-3" /> Focus / Refinement
+                         </label>
+                         <input 
+                            type="text"
+                            value={focusArea}
+                            onChange={(e) => setFocusArea(e.target.value)}
+                            placeholder="e.g. Focus on Auth flow"
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-700 focus:ring-1 focus:ring-violet-500/50 font-mono"
+                         />
+                    </div>
                 </div>
             </form>
             

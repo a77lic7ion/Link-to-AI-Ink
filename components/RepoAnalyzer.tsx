@@ -6,8 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchRepoFileTree } from '../services/githubService';
 import { generateInfographic } from '../services/geminiService';
-import { RepoFileTree, ViewMode, RepoHistoryItem } from '../types';
-import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, KeyRound } from 'lucide-react';
+import { RepoFileTree, ViewMode, RepoHistoryItem, InitialConfig } from '../types';
+import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, RefreshCw, Sliders } from 'lucide-react';
 import { LoadingState } from './LoadingState';
 import ImageViewer from './ImageViewer';
 
@@ -15,7 +15,7 @@ interface RepoAnalyzerProps {
   onNavigate: (mode: ViewMode, data?: any) => void;
   history: RepoHistoryItem[];
   onAddToHistory: (item: RepoHistoryItem) => void;
-  initialUrl?: string;
+  initialConfig?: InitialConfig | null;
 }
 
 const FLOW_STYLES = [
@@ -44,7 +44,7 @@ const LANGUAGES = [
   { label: "Chinese (China)", value: "Chinese" },
 ];
 
-const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddToHistory, initialUrl }) => {
+const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddToHistory, initialConfig }) => {
   const [repoInput, setRepoInput] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(FLOW_STYLES[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0].value);
@@ -53,6 +53,10 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState<string>('');
   
+  // Refinement State
+  const [refinementPrompt, setRefinementPrompt] = useState('');
+  const [customName, setCustomName] = useState('');
+
   // Infographic State
   const [infographicData, setInfographicData] = useState<string | null>(null);
   const [infographic3DData, setInfographic3DData] = useState<string | null>(null);
@@ -63,17 +67,30 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   // Viewer State
   const [fullScreenImage, setFullScreenImage] = useState<{src: string, alt: string} | null>(null);
 
-  // Auto-run if initialUrl is present
+  // Auto-run if initialConfig is present
   useEffect(() => {
-    if (initialUrl && !infographicData && !loading) {
-        setRepoInput(initialUrl);
+    if (initialConfig && !infographicData && !loading) {
+        setRepoInput(initialConfig.url);
+        if (initialConfig.customName) setCustomName(initialConfig.customName);
+        if (initialConfig.style) {
+             if (FLOW_STYLES.includes(initialConfig.style)) {
+                 setSelectedStyle(initialConfig.style);
+             } else {
+                 setSelectedStyle('Custom');
+                 setCustomStyle(initialConfig.style);
+             }
+        }
+        if (initialConfig.focus) {
+            setRefinementPrompt(initialConfig.focus);
+        }
+
         // Delay slightly to ensure render, then trigger
         setTimeout(() => {
             const form = document.getElementById('repo-form') as HTMLFormElement;
             if (form) form.requestSubmit();
         }, 100);
     }
-  }, [initialUrl]);
+  }, [initialConfig]);
 
   const parseRepoInput = (input: string): { owner: string, repo: string } | null => {
     const cleanInput = input.trim().replace(/\/$/, '');
@@ -130,12 +147,21 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
       setLoadingStage('ANALYZING STRUCTURE & GENERATING');
       
       const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
+      const titleToUse = customName || repoDetails.repo;
 
-      const infographicBase64 = await generateInfographic(repoDetails.repo, fileTree, styleToUse, false, selectedLanguage);
+      const infographicBase64 = await generateInfographic(
+          repoDetails.repo, 
+          fileTree, 
+          styleToUse, 
+          false, 
+          selectedLanguage,
+          titleToUse,
+          refinementPrompt
+      );
       
       if (infographicBase64) {
         setInfographicData(infographicBase64);
-        addToHistory(repoDetails.repo, infographicBase64, false, styleToUse);
+        addToHistory(titleToUse, infographicBase64, false, styleToUse);
       } else {
           throw new Error("Failed to generate visual.");
       }
@@ -148,16 +174,58 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
     }
   };
 
+  const handleRegenerate = async () => {
+     if (!currentFileTree || !currentRepoName) return;
+     
+     setLoading(true);
+     setLoadingStage('REFINING & REGENERATING');
+     
+     try {
+        const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
+        const titleToUse = customName || currentRepoName;
+
+        const infographicBase64 = await generateInfographic(
+            currentRepoName, 
+            currentFileTree, 
+            styleToUse, 
+            false, 
+            selectedLanguage,
+            titleToUse,
+            refinementPrompt
+        );
+        
+        if (infographicBase64) {
+            setInfographicData(infographicBase64);
+            addToHistory(titleToUse, infographicBase64, false, styleToUse);
+        }
+     } catch (err: any) {
+         handleApiError(err);
+     } finally {
+         setLoading(false);
+         setLoadingStage('');
+     }
+  };
+
   const handleGenerate3D = async () => {
     if (!currentFileTree || !currentRepoName) return;
     setGenerating3D(true);
     try {
       // Pass the same selected style to the 3D generator
       const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
-      const data = await generateInfographic(currentRepoName, currentFileTree, styleToUse, true, selectedLanguage);
+      const titleToUse = customName || currentRepoName;
+      
+      const data = await generateInfographic(
+          currentRepoName, 
+          currentFileTree, 
+          styleToUse, 
+          true, 
+          selectedLanguage,
+          titleToUse,
+          refinementPrompt
+      );
       if (data) {
           setInfographic3DData(data);
-          addToHistory(currentRepoName, data, true, styleToUse);
+          addToHistory(titleToUse, data, true, styleToUse);
       }
     } catch (err: any) {
       handleApiError(err);
@@ -169,14 +237,11 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   const loadFromHistory = (item: RepoHistoryItem) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setCurrentRepoName(item.repoName);
-      // Since history items don't store the full file tree (too large), we just show the image.
-      // If user wants to generate 3D from history of a 2D, they'd need to re-fetch.
-      // For simplicity, we display the historical image in the appropriate slot.
       if (item.is3D) {
           setInfographic3DData(item.imageData);
       } else {
           setInfographicData(item.imageData);
-          setInfographic3DData(null); // Clear 3D if loading a 2D history item to avoid confusion
+          setInfographic3DData(null); 
       }
   };
 
@@ -295,7 +360,7 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
 
       {/* Results Section */}
       {infographicData && !loading && (
-        <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 2D Infographic Card */}
@@ -372,6 +437,28 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
                 </div>
               </div>
           </div>
+
+          {/* Refinement Station */}
+          <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 border border-white/5 bg-white/5">
+             <div className="flex items-center gap-2 text-slate-400 shrink-0">
+                 <Sliders className="w-5 h-5" />
+                 <span className="text-xs font-mono uppercase tracking-wider">Refine_Output</span>
+             </div>
+             <input 
+                type="text" 
+                value={refinementPrompt}
+                onChange={(e) => setRefinementPrompt(e.target.value)}
+                placeholder="e.g. 'Focus on the authentication flow' or 'Make it darker'"
+                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-violet-500/50 font-mono"
+             />
+             <button 
+                onClick={handleRegenerate}
+                className="px-4 py-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-violet shrink-0"
+             >
+                 <RefreshCw className="w-3 h-3" /> Regenerate
+             </button>
+          </div>
+
         </div>
       )}
 

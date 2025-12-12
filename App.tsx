@@ -15,11 +15,8 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>(ViewMode.HOME);
   const [showIntro, setShowIntro] = useState(true);
   
-  // Lifted History State for Persistence
   const [repoHistory, setRepoHistory] = useState<RepoHistoryItem[]>([]);
   const [articleHistory, setArticleHistory] = useState<ArticleHistoryItem[]>([]);
-  
-  // Initial Config State passed from Home
   const [initialConfig, setInitialConfig] = useState<InitialConfig | null>(null);
 
   const handleIntroComplete = () => {
@@ -28,12 +25,11 @@ const App: React.FC = () => {
 
   const handleNavigate = (mode: ViewMode) => {
     setCurrentView(mode);
-    setInitialConfig(null); // Clear config on manual nav
+    setInitialConfig(null); 
   };
 
   const handleUrlSubmit = (config: InitialConfig) => {
     setInitialConfig(config);
-    // Basic detection for GitHub URLs
     if (config.url.includes('github.com') && config.url.split('/').length >= 4) {
       setCurrentView(ViewMode.REPO_ANALYZER);
     } else {
@@ -50,57 +46,58 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-300 selection:bg-fuchsia-500/30 selection:text-fuchsia-100">
+    <div className="min-h-screen flex flex-col font-sans text-zinc-300 selection:bg-white/20 selection:text-white">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
 
-      <header className="sticky top-4 z-50 mx-auto w-[calc(100%-1rem)] md:w-[calc(100%-2rem)] max-w-[1400px]">
-        <div className="glass-panel rounded-full px-5 py-3 flex justify-between items-center shadow-2xl border border-white/5 bg-[#0a0a0a]/60 backdrop-blur-xl">
+      {/* Floating Header */}
+      <header className="sticky top-6 z-50 mx-auto w-full max-w-2xl px-4">
+        <div className="bg-[#09090b]/80 backdrop-blur-xl rounded-full px-4 py-2 flex justify-between items-center shadow-2xl border border-white/10">
           <button 
             onClick={() => setCurrentView(ViewMode.HOME)}
-            className="flex items-center gap-3 group transition-all hover:opacity-100 opacity-90"
+            className="flex items-center gap-3 group transition-all hover:opacity-100 opacity-80"
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600/20 to-fuchsia-600/20 border border-white/10 group-hover:border-violet-500/50 transition-all shadow-inner">
-               <PenTool className="w-5 h-5 text-violet-200" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white text-black font-bold shadow-lg shadow-white/10 group-hover:scale-105 transition-transform">
+               <PenTool className="w-4 h-4" />
             </div>
             <div className="text-left flex flex-col justify-center h-full">
-              <h1 className="text-lg font-bold text-white tracking-tight leading-none flex items-center gap-2">
-                AFFLICTED<span className="text-violet-500">.AI</span>
+              <h1 className="text-sm font-bold text-white tracking-wide leading-none flex items-center gap-1.5 font-mono">
+                AFFLICTED<span className="text-zinc-500">.AI</span>
               </h1>
-              <span className="text-[10px] font-mono text-slate-500 tracking-[0.2em] uppercase leading-none mt-1">Studio</span>
             </div>
           </button>
-          <div className="flex items-center gap-4">
+          
+          <div className="flex items-center gap-2">
             <a 
               href="https://github.com" 
               target="_blank" 
               rel="noreferrer" 
-              className="p-2.5 rounded-full bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-violet-500/30 transition-all hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+              className="p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/5 transition-all"
             >
-              <Github className="w-5 h-5" />
+              <Github className="w-4 h-4" />
             </a>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
-        {/* Navigation Tabs (Hidden on Home, visible on tools) */}
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col relative z-0">
+        {/* Navigation Tabs (Hidden on Home) */}
         {currentView !== ViewMode.HOME && (
             <div className="flex justify-center mb-12 animate-in fade-in slide-in-from-top-4 sticky top-24 z-40">
-            <div className="glass-panel p-1.5 rounded-full flex relative shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-white/5 bg-[#0a0a0a]/80 backdrop-blur-xl">
+            <div className="bg-[#09090b]/90 backdrop-blur-xl p-1 rounded-full flex relative shadow-xl border border-white/5">
                 <button
                 onClick={() => setCurrentView(ViewMode.HOME)}
-                className="relative flex items-center justify-center w-10 h-10 rounded-full font-medium text-sm transition-all duration-300 font-mono text-slate-500 hover:text-white hover:bg-white/10"
+                className="relative flex items-center justify-center w-8 h-8 rounded-full font-medium text-sm transition-all duration-300 text-zinc-500 hover:text-white hover:bg-white/5"
                 title="Home"
                 >
                 <HomeIcon className="w-4 h-4" />
                 </button>
-                <div className="w-px h-5 bg-white/10 my-auto mx-1"></div>
+                <div className="w-px h-4 bg-white/10 my-auto mx-1"></div>
                 <button
                 onClick={() => setCurrentView(ViewMode.REPO_ANALYZER)}
-                className={`relative flex items-center gap-2 px-5 py-2 rounded-full font-medium text-xs uppercase tracking-wider transition-all duration-300 font-mono ${
+                className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full font-medium text-xs uppercase tracking-wider transition-all duration-300 font-mono ${
                     currentView === ViewMode.REPO_ANALYZER
-                    ? 'text-white bg-violet-600/10 shadow-[inset_0_0_10px_rgba(139,92,246,0.2)] border border-violet-500/20'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'text-black bg-white shadow-lg'
+                    : 'text-zinc-500 hover:text-zinc-300'
                 }`}
                 >
                 <GitBranch className="w-3.5 h-3.5" />
@@ -108,10 +105,10 @@ const App: React.FC = () => {
                 </button>
                 <button
                 onClick={() => setCurrentView(ViewMode.ARTICLE_INFOGRAPHIC)}
-                className={`relative flex items-center gap-2 px-5 py-2 rounded-full font-medium text-xs uppercase tracking-wider transition-all duration-300 font-mono ${
+                className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full font-medium text-xs uppercase tracking-wider transition-all duration-300 font-mono ${
                     currentView === ViewMode.ARTICLE_INFOGRAPHIC
-                    ? 'text-emerald-100 bg-emerald-500/10 shadow-[inset_0_0_10px_rgba(16,185,129,0.2)] border border-emerald-500/20'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'text-black bg-white shadow-lg'
+                    : 'text-zinc-500 hover:text-zinc-300'
                 }`}
                 >
                 <FileText className="w-3.5 h-3.5" />
@@ -147,9 +144,9 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className="py-8 mt-auto border-t border-white/5 bg-[#050505]">
+      <footer className="py-8 mt-auto border-t border-white/5 bg-[#020202]">
         <div className="max-w-7xl mx-auto text-center px-4">
-          <p className="text-[10px] md:text-xs font-mono text-slate-600 tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity">
+          <p className="text-[10px] md:text-xs font-mono text-zinc-600 tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity">
             @2025 - AfflictedAI - We trying ok.....
           </p>
         </div>

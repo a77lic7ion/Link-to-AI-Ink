@@ -19,7 +19,6 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onUrlSubmit }) => {
   const [customName, setCustomName] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(STYLES[0]);
   const [focusArea, setFocusArea] = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,132 +33,121 @@ const Home: React.FC<HomeProps> = ({ onNavigate, onUrlSubmit }) => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-24 mb-20">
+    <div className="max-w-4xl mx-auto space-y-24 mb-20">
       {/* Hero Section */}
-      <div className="text-center space-y-8 pt-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="text-center space-y-8 pt-20 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0F172A] border border-violet-500/20 text-[10px] font-mono text-violet-300 uppercase tracking-widest shadow-[0_0_15px_rgba(139,92,246,0.15)] mb-4">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-            </span>
-            System Online: Gemini 2.5 Flash
+        {/* Minimal Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-zinc-400 uppercase tracking-widest mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            System Online
         </div>
         
-        {/* Title */}
-        <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-600 font-sans leading-[0.85] select-none">
-          LINK<br/>
-          <span className="text-stroke-thin opacity-20">TO</span><br/>
+        {/* Title - Clean & Huge */}
+        <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-white font-sans leading-[0.8]">
+          LINK
+          <span className="text-zinc-700">2</span>
           INK
         </h1>
         
-        <p className="text-slate-400 text-lg font-mono font-light max-w-xl mx-auto leading-relaxed pt-4">
-          Visual Intelligence for <span className="text-white font-bold">Developers</span> & <span className="text-white font-bold">Designers</span>.
-          <br/>Turn URL inputs into structured visual data.
+        <p className="text-zinc-400 text-lg font-normal max-w-lg mx-auto leading-relaxed pt-2">
+          Turn URLs into structured visual blueprints.
         </p>
 
-        {/* Unified Input Section */}
-        <div className="w-full max-w-3xl mx-auto pt-10 relative z-10 group">
-            {/* Glow effect behind input */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+        {/* High Contrast Input Section */}
+        <div className="w-full max-w-2xl mx-auto pt-12 relative z-10 group">
+            <div className="absolute -inset-0.5 bg-gradient-to-b from-white/20 to-transparent rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
             
-            <form onSubmit={handleSubmit} className="relative space-y-2">
-                {/* Main URL Input */}
-                <div className="relative bg-[#050505] rounded-xl p-2 flex items-center ring-1 ring-white/10 focus-within:ring-violet-500/50 transition-all shadow-2xl z-20">
-                    <div className="pl-5 pr-4 text-slate-500">
-                        <Link className="w-5 h-5" />
-                    </div>
+            <form onSubmit={handleSubmit} className="relative space-y-3">
+                {/* Main Bar */}
+                <div className="relative bg-[#050505] rounded-xl p-2 pl-4 flex items-center ring-1 ring-white/10 focus-within:ring-white/30 transition-all shadow-2xl">
+                    <Link className="w-5 h-5 text-zinc-600 mr-4" />
                     <input 
                         type="url" 
                         value={inputUrl}
                         onChange={(e) => setInputUrl(e.target.value)}
-                        placeholder="https://github.com/user/repo  or  https://site.com/article"
-                        className="w-full bg-transparent border-none text-slate-200 placeholder:text-slate-600 focus:ring-0 text-base py-4 font-mono tracking-tight"
+                        placeholder="Paste Repository or Article URL..."
+                        className="w-full bg-transparent border-none text-white placeholder:text-zinc-700 focus:ring-0 text-base py-3 font-mono tracking-tight"
                         required
                     />
                     <button 
                         type="submit"
-                        className="px-8 py-4 bg-white text-black hover:bg-slate-200 rounded-lg font-bold transition-all flex items-center gap-2 font-mono uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        className="px-6 py-3 bg-white hover:bg-zinc-200 text-black rounded-lg font-bold transition-all flex items-center gap-2 font-mono uppercase tracking-wider text-[11px] shadow-[0_0_15px_rgba(255,255,255,0.2)]"
                     >
                         INITIALIZE <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>
 
-                {/* Additional Controls Panel */}
-                <div className="bg-[#080808]/90 backdrop-blur-xl border border-white/5 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2">
-                    
-                    {/* Business/Repo Name */}
-                    <div className="space-y-2">
-                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                            <Type className="w-3 h-3" /> Project / Business Name
-                         </label>
-                         <input 
-                            type="text"
-                            value={customName}
-                            onChange={(e) => setCustomName(e.target.value)}
-                            placeholder="e.g. Savage Mugs Inc."
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-700 focus:ring-1 focus:ring-violet-500/50 font-mono"
-                         />
+                {/* Additional Controls - Carbon Style */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {/* Name */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-lg p-3 flex flex-col gap-1.5 group/item focus-within:border-white/20 transition-colors">
+                        <label className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                           <Type className="w-3 h-3" /> Name
+                        </label>
+                        <input 
+                           type="text"
+                           value={customName}
+                           onChange={(e) => setCustomName(e.target.value)}
+                           placeholder="Optional Project Name"
+                           className="bg-transparent border-none p-0 text-xs text-white placeholder:text-zinc-800 focus:ring-0 font-mono w-full"
+                        />
                     </div>
 
-                    {/* Style Selection */}
-                    <div className="space-y-2">
-                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                            <Palette className="w-3 h-3" /> Visual Style
-                         </label>
-                         <select
-                            value={selectedStyle}
-                            onChange={(e) => setSelectedStyle(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:ring-1 focus:ring-violet-500/50 font-mono appearance-none"
-                         >
-                            {STYLES.map(s => <option key={s} value={s}>{s}</option>)}
-                            <option value="Custom">Custom</option>
-                         </select>
+                    {/* Style */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-lg p-3 flex flex-col gap-1.5 group/item focus-within:border-white/20 transition-colors relative">
+                        <label className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                           <Palette className="w-3 h-3" /> Style
+                        </label>
+                        <select
+                           value={selectedStyle}
+                           onChange={(e) => setSelectedStyle(e.target.value)}
+                           className="bg-transparent border-none p-0 text-xs text-white focus:ring-0 font-mono w-full appearance-none cursor-pointer relative z-10"
+                        >
+                           {STYLES.map(s => <option key={s} value={s} className="bg-black">{s}</option>)}
+                           <option value="Custom" className="bg-black">Custom</option>
+                        </select>
+                        <div className="absolute right-3 bottom-3 pointer-events-none text-zinc-700">
+                           <ArrowRight className="w-3 h-3 rotate-90" />
+                        </div>
                     </div>
 
-                    {/* Focus / Extra Context */}
-                    <div className="space-y-2">
-                         <label className="text-[10px] text-slate-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                            <Target className="w-3 h-3" /> Focus / Refinement
-                         </label>
-                         <input 
-                            type="text"
-                            value={focusArea}
-                            onChange={(e) => setFocusArea(e.target.value)}
-                            placeholder="e.g. Focus on Auth flow"
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-700 focus:ring-1 focus:ring-violet-500/50 font-mono"
-                         />
+                    {/* Focus */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-lg p-3 flex flex-col gap-1.5 group/item focus-within:border-white/20 transition-colors">
+                        <label className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                           <Target className="w-3 h-3" /> Focus
+                        </label>
+                        <input 
+                           type="text"
+                           value={focusArea}
+                           onChange={(e) => setFocusArea(e.target.value)}
+                           placeholder="e.g. Auth flow"
+                           className="bg-transparent border-none p-0 text-xs text-white placeholder:text-zinc-800 focus:ring-0 font-mono w-full"
+                        />
                     </div>
                 </div>
             </form>
             
-            {/* Input helpers */}
-            <div className="flex justify-between mt-4 px-4 opacity-60">
-                <div className="flex gap-6 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5"><Code2 className="w-3 h-3" /> Repositories</span>
-                    <span className="flex items-center gap-1.5"><Globe className="w-3 h-3" /> Web Articles</span>
-                </div>
-                <p className="text-[10px] text-emerald-500 font-mono uppercase tracking-widest flex items-center gap-1.5">
-                    <Zap className="w-3 h-3" /> Free Tier Ready
-                </p>
+            <div className="flex justify-center mt-6 opacity-40 hover:opacity-80 transition-opacity gap-8">
+               <span className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 uppercase tracking-widest"><Code2 className="w-3 h-3" /> Git Repos</span>
+               <span className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 uppercase tracking-widest"><Globe className="w-3 h-3" /> Web Articles</span>
             </div>
         </div>
       </div>
 
-      {/* Feature Grid */}
+      {/* Feature Grid - Minimal */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 border-t border-white/5 relative">
          {[
-             { title: "Analysis", desc: "Deep structural scanning of code trees and DOM elements.", icon: Search, color: "text-violet-400", border: "group-hover:border-violet-500/30" },
-             { title: "Synthesis", desc: "LLM-driven conversion of logic into visual metaphors.", icon: Zap, color: "text-fuchsia-400", border: "group-hover:border-fuchsia-500/30" },
-             { title: "Render", desc: "High-fidelity generation of blueprints and infographics.", icon: Sparkles, color: "text-emerald-400", border: "group-hover:border-emerald-500/30" }
+             { title: "Analysis", desc: "Code tree scanning.", icon: Search },
+             { title: "Synthesis", desc: "Logic to visual metaphor.", icon: Zap },
+             { title: "Render", desc: "High-fidelity generation.", icon: Sparkles }
          ].map((item, i) => (
-             <div key={i} className={`group p-8 rounded-2xl bg-[#080808] border border-white/5 hover:bg-[#0c0c0c] transition-all duration-300 ${item.border}`}>
-                 <div className="mb-6 w-10 h-10 rounded-lg bg-black border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                     <item.icon className={`w-5 h-5 ${item.color}`} />
+             <div key={i} className="group p-6 rounded-xl bg-[#09090b] border border-white/5 hover:border-white/10 transition-all">
+                 <div className="mb-4 w-8 h-8 rounded bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                     <item.icon className="w-4 h-4" />
                  </div>
-                 <h3 className="text-lg font-bold text-slate-200 font-sans mb-2 group-hover:text-white transition-colors">{item.title}</h3>
-                 <p className="text-sm text-slate-500 font-mono leading-relaxed">{item.desc}</p>
+                 <h3 className="text-sm font-bold text-zinc-200 font-mono mb-1">{item.title}</h3>
+                 <p className="text-xs text-zinc-500 font-sans">{item.desc}</p>
              </div>
          ))}
       </div>

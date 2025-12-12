@@ -52,22 +52,15 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState<string>('');
-  
-  // Refinement State
   const [refinementPrompt, setRefinementPrompt] = useState('');
   const [customName, setCustomName] = useState('');
-
-  // Infographic State
   const [infographicData, setInfographicData] = useState<string | null>(null);
   const [infographic3DData, setInfographic3DData] = useState<string | null>(null);
   const [generating3D, setGenerating3D] = useState(false);
   const [currentFileTree, setCurrentFileTree] = useState<RepoFileTree[] | null>(null);
   const [currentRepoName, setCurrentRepoName] = useState<string>('');
-  
-  // Viewer State
   const [fullScreenImage, setFullScreenImage] = useState<{src: string, alt: string} | null>(null);
 
-  // Auto-run if initialConfig is present
   useEffect(() => {
     if (initialConfig && !infographicData && !loading) {
         setRepoInput(initialConfig.url);
@@ -83,8 +76,6 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
         if (initialConfig.focus) {
             setRefinementPrompt(initialConfig.focus);
         }
-
-        // Delay slightly to ensure render, then trigger
         setTimeout(() => {
             const form = document.getElementById('repo-form') as HTMLFormElement;
             if (form) form.requestSubmit();
@@ -176,24 +167,12 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
 
   const handleRegenerate = async () => {
      if (!currentFileTree || !currentRepoName) return;
-     
      setLoading(true);
      setLoadingStage('REFINING & REGENERATING');
-     
      try {
         const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
         const titleToUse = customName || currentRepoName;
-
-        const infographicBase64 = await generateInfographic(
-            currentRepoName, 
-            currentFileTree, 
-            styleToUse, 
-            false, 
-            selectedLanguage,
-            titleToUse,
-            refinementPrompt
-        );
-        
+        const infographicBase64 = await generateInfographic(currentRepoName, currentFileTree, styleToUse, false, selectedLanguage, titleToUse, refinementPrompt);
         if (infographicBase64) {
             setInfographicData(infographicBase64);
             addToHistory(titleToUse, infographicBase64, false, styleToUse);
@@ -210,19 +189,9 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
     if (!currentFileTree || !currentRepoName) return;
     setGenerating3D(true);
     try {
-      // Pass the same selected style to the 3D generator
       const styleToUse = selectedStyle === 'Custom' ? customStyle : selectedStyle;
       const titleToUse = customName || currentRepoName;
-      
-      const data = await generateInfographic(
-          currentRepoName, 
-          currentFileTree, 
-          styleToUse, 
-          true, 
-          selectedLanguage,
-          titleToUse,
-          refinementPrompt
-      );
+      const data = await generateInfographic(currentRepoName, currentFileTree, styleToUse, true, selectedLanguage, titleToUse, refinementPrompt);
       if (data) {
           setInfographic3DData(data);
           addToHistory(titleToUse, data, true, styleToUse);
@@ -258,19 +227,16 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
 
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-6">
-        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-500 font-sans leading-tight">
-          Codebase <span className="text-violet-400">Intelligence</span>.
+        <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white font-sans">
+          Codebase <span className="text-zinc-500">Intelligence</span>.
         </h2>
-        <p className="text-slate-400 text-lg md:text-xl font-light tracking-wide">
-          Turn any repository into a fully analyzed, interactive architectural blueprint.
-        </p>
       </div>
 
       {/* Input Section */}
       <div className="max-w-xl mx-auto relative z-10">
-        <form id="repo-form" onSubmit={handleAnalyze} className="glass-panel rounded-2xl p-2 transition-all focus-within:ring-1 focus-within:ring-violet-500/50 focus-within:border-violet-500/50 shadow-neon-violet">
+        <form id="repo-form" onSubmit={handleAnalyze} className="glass-panel rounded-xl p-2 transition-all focus-within:border-white/20">
           <div className="flex items-center">
-             <div className="pl-3 text-slate-500">
+             <div className="pl-3 text-zinc-500">
                 <Command className="w-5 h-5" />
              </div>
              <input
@@ -278,78 +244,24 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
                 value={repoInput}
                 onChange={(e) => setRepoInput(e.target.value)}
                 placeholder="owner/repository"
-                className="w-full bg-transparent border-none text-white placeholder:text-slate-600 focus:ring-0 text-lg px-4 py-2 font-mono"
+                className="w-full bg-transparent border-none text-white placeholder:text-zinc-700 focus:ring-0 text-sm px-4 py-2 font-mono"
               />
               <div className="pr-2">
                 <button
                 type="submit"
                 disabled={loading || !repoInput.trim()}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border border-white/10 font-mono text-sm"
+                className="px-4 py-2 bg-white hover:bg-zinc-200 text-black rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-mono text-xs uppercase tracking-wider"
                 >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "RUN_ANALYSIS"}
+                {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : "RUN_ANALYSIS"}
                 </button>
-             </div>
-          </div>
-
-          {/* Controls: Style and Language */}
-          <div className="mt-2 pt-2 border-t border-white/5 px-3 pb-1 space-y-3">
-             {/* Style Selector */}
-             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-                 <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[10px] uppercase tracking-wider shrink-0">
-                     <Palette className="w-3 h-3" /> Style:
-                 </div>
-                 <div className="flex gap-2">
-                     {FLOW_STYLES.map(style => (
-                         <button
-                            key={style}
-                            type="button"
-                            onClick={() => setSelectedStyle(style)}
-                            className={`text-[11px] px-2.5 py-1 rounded-md font-mono transition-all whitespace-nowrap ${
-                                selectedStyle === style 
-                                ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' 
-                                : 'bg-white/5 text-slate-500 hover:text-slate-300 border border-transparent hover:border-white/10'
-                            }`}
-                         >
-                             {style}
-                         </button>
-                     ))}
-                 </div>
-             </div>
-             
-             {/* Language Selector & Custom Style Input */}
-             <div className="flex flex-wrap gap-3">
-               <div className="flex items-center gap-2 bg-slate-950/50 border border-white/10 rounded-lg px-2 py-1 shrink-0 min-w-0 max-w-full">
-                  <Globe className="w-3 h-3 text-slate-500 shrink-0" />
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="bg-transparent border-none text-xs text-slate-300 focus:ring-0 p-0 font-mono cursor-pointer min-w-0 flex-1 truncate"
-                  >
-                    {LANGUAGES.map((lang) => (
-                      <option key={lang.value} value={lang.value} className="bg-slate-900 text-slate-300">
-                        {lang.label}
-                      </option>
-                    ))}
-                  </select>
-               </div>
-
-               {selectedStyle === 'Custom' && (
-                   <input 
-                      type="text" 
-                      value={customStyle}
-                      onChange={(e) => setCustomStyle(e.target.value)}
-                      placeholder="Custom style..."
-                      className="flex-1 min-w-[120px] bg-slate-950/50 border border-white/10 rounded-lg px-3 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 font-mono transition-all"
-                   />
-               )}
              </div>
           </div>
         </form>
       </div>
 
       {error && (
-        <div className="max-w-2xl mx-auto p-4 glass-panel border-red-500/30 rounded-xl flex items-center gap-3 text-red-400 animate-in fade-in slide-in-from-top-2 font-mono text-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
+        <div className="max-w-2xl mx-auto p-4 border border-red-500/20 bg-red-500/5 rounded-xl flex items-center gap-3 text-red-400 animate-in fade-in slide-in-from-top-2 font-mono text-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p className="flex-1">{error}</p>
         </div>
       )}
@@ -364,73 +276,66 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 2D Infographic Card */}
-              <div className="glass-panel rounded-3xl p-1.5 shadow-xl">
-                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 gap-2 bg-white/[0.02] rounded-t-2xl">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
-                      <Layers className="w-4 h-4 text-violet-400" /> Flow_Diagram
+              <div className="glass-panel rounded-2xl p-0 overflow-hidden">
+                 <div className="px-4 py-3 flex items-center justify-between border-b border-white/5 bg-zinc-900/50">
+                    <h3 className="text-xs font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
+                      <Layers className="w-3 h-3 text-zinc-400" /> Flow_Diagram
                     </h3>
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => setFullScreenImage({src: `data:image/png;base64,${infographicData}`, alt: `${currentRepoName} 2D`})}
-                        className="text-xs flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-mono p-1.5 rounded-lg hover:bg-white/10"
+                        className="text-xs flex items-center gap-2 text-zinc-500 hover:text-white transition-colors p-1"
                         title="Full Screen"
                       >
                         <Maximize className="w-4 h-4" />
                       </button>
-                      <a href={`data:image/png;base64,${infographicData}`} download={`${currentRepoName}-infographic-2d.png`} className="text-xs flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-mono bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 border border-white/10 font-semibold">
-                        <Download className="w-3 h-3" /> Save PNG
+                      <a href={`data:image/png;base64,${infographicData}`} download={`${currentRepoName}-infographic-2d.png`} className="text-[10px] flex items-center gap-1.5 text-black hover:text-zinc-800 bg-white hover:bg-zinc-200 px-2 py-1 rounded font-bold uppercase tracking-wider transition-colors">
+                        <Download className="w-3 h-3" /> PNG
                       </a>
                     </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden bg-[#eef8fe] relative group border border-slate-200/10 min-h-[300px] flex items-center justify-center">
-                    {selectedStyle === "Neon Cyberpunk" && <div className="absolute inset-0 bg-slate-950 pointer-events-none mix-blend-multiply" />}
-                    <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="bg-[#eef8fe] relative group min-h-[300px] flex items-center justify-center">
                     <img src={`data:image/png;base64,${infographicData}`} alt="Repository Flow Diagram" className="w-full h-auto object-cover transition-opacity relative z-10" />
                 </div>
               </div>
 
               {/* 3D Infographic Card */}
-              <div className="glass-panel rounded-3xl p-1.5 flex flex-col shadow-xl">
-                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 shrink-0 gap-2 bg-white/[0.02] rounded-t-2xl">
-                    <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
-                      <Box className="w-4 h-4 text-fuchsia-400" /> Holographic_Model
+              <div className="glass-panel rounded-2xl p-0 overflow-hidden flex flex-col">
+                 <div className="px-4 py-3 flex items-center justify-between border-b border-white/5 bg-zinc-900/50">
+                    <h3 className="text-xs font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
+                      <Box className="w-3 h-3 text-zinc-400" /> Holographic_Model
                     </h3>
                     {infographic3DData && (
                       <div className="flex items-center gap-2 animate-in fade-in">
                         <button 
                             onClick={() => setFullScreenImage({src: `data:image/png;base64,${infographic3DData}`, alt: `${currentRepoName} 3D`})}
-                            className="text-xs flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-mono p-1.5 rounded-lg hover:bg-white/10"
-                            title="Full Screen"
+                            className="text-xs flex items-center gap-2 text-zinc-500 hover:text-white transition-colors p-1"
                         >
                             <Maximize className="w-4 h-4" />
                         </button>
-                        <a href={`data:image/png;base64,${infographic3DData}`} download={`${currentRepoName}-infographic-3d.png`} className="text-xs flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-mono bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 border border-white/10 font-semibold">
-                          <Download className="w-3 h-3" /> Save PNG
+                        <a href={`data:image/png;base64,${infographic3DData}`} download={`${currentRepoName}-infographic-3d.png`} className="text-[10px] flex items-center gap-1.5 text-black hover:text-zinc-800 bg-white hover:bg-zinc-200 px-2 py-1 rounded font-bold uppercase tracking-wider transition-colors">
+                          <Download className="w-3 h-3" /> PNG
                         </a>
                       </div>
                     )}
                 </div>
                 
-                <div className="flex-1 rounded-2xl overflow-hidden bg-slate-950/30 relative flex items-center justify-center min-h-[300px] group border border-white/5">
+                <div className="flex-1 bg-black relative flex items-center justify-center min-h-[300px] group">
                   {infographic3DData ? (
-                      <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-                         <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
-                         <img src={`data:image/png;base64,${infographic3DData}`} alt="Repository 3D Flow Diagram" className="w-full h-full object-cover animate-in fade-in transition-opacity relative z-20" />
-                      </div>
+                      <img src={`data:image/png;base64,${infographic3DData}`} alt="Repository 3D Flow Diagram" className="w-full h-full object-cover animate-in fade-in transition-opacity" />
                   ) : generating3D ? (
                     <div className="flex flex-col items-center justify-center gap-4 p-6 text-center animate-in fade-in">
-                         <Loader2 className="w-8 h-8 animate-spin text-fuchsia-500/50" />
-                         <p className="text-fuchsia-300/50 font-mono text-xs animate-pulse">RENDERING HOLOGRAPHIC MODEL...</p>
+                         <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
+                         <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">Rendering...</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-4 p-6 text-center">
-                        <p className="text-slate-500 font-mono text-xs">Render tabletop perspective?</p>
+                        <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">Tabletop View</p>
                         <button 
                           onClick={handleGenerate3D}
-                          className="px-5 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-xl font-semibold transition-all flex items-center gap-2 font-mono text-sm shadow-[0_0_15px_rgba(217,70,239,0.1)] hover:shadow-[0_0_20px_rgba(217,70,239,0.3)]"
+                          className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider"
                         >
-                          <Sparkles className="w-4 h-4" />
-                          GENERATE_MODEL
+                          <Sparkles className="w-3 h-3" /> Generate
                         </button>
                     </div>
                   )}
@@ -439,21 +344,21 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
           </div>
 
           {/* Refinement Station */}
-          <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 border border-white/10 bg-[#0a0a0a]/80 shadow-lg">
-             <div className="flex items-center gap-2 text-slate-400 shrink-0">
-                 <Sliders className="w-5 h-5 text-violet-400" />
-                 <span className="text-xs font-mono uppercase tracking-wider text-slate-300">Refine_Output</span>
+          <div className="bg-[#09090b] rounded-xl p-3 flex flex-col md:flex-row items-center gap-3 border border-white/5">
+             <div className="flex items-center gap-2 text-zinc-500 shrink-0">
+                 <Sliders className="w-4 h-4" />
+                 <span className="text-[10px] font-mono uppercase tracking-wider">Refine</span>
              </div>
              <input 
                 type="text" 
                 value={refinementPrompt}
                 onChange={(e) => setRefinementPrompt(e.target.value)}
                 placeholder="e.g. 'Focus on the authentication flow' or 'Make it darker'"
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 font-mono transition-all"
+                className="flex-1 bg-black border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-700 focus:ring-1 focus:ring-white/20 font-mono transition-all"
              />
              <button 
                 onClick={handleRegenerate}
-                className="px-6 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-violet shrink-0"
+                className="px-4 py-2 bg-white hover:bg-zinc-200 text-black rounded-lg font-bold transition-all flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider shrink-0"
              >
                  <RefreshCw className="w-3 h-3" /> Regenerate
              </button>
@@ -465,26 +370,26 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
       {/* History Section */}
       {history.length > 0 && (
           <div className="pt-12 border-t border-white/5 animate-in fade-in">
-              <div className="flex items-center gap-2 mb-6 text-slate-400">
+              <div className="flex items-center gap-2 mb-6 text-zinc-500">
                   <Clock className="w-4 h-4" />
-                  <h3 className="text-sm font-mono uppercase tracking-wider">Recent Blueprints</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider">History</h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {history.map((item) => (
                       <button 
                         key={item.id}
                         onClick={() => loadFromHistory(item)}
-                        className="group bg-slate-900/50 border border-white/5 hover:border-violet-500/50 rounded-xl overflow-hidden text-left transition-all hover:shadow-neon-violet"
+                        className="group bg-[#09090b] border border-white/5 hover:border-white/20 rounded-xl overflow-hidden text-left transition-all"
                       >
-                          <div className="aspect-video relative overflow-hidden bg-slate-950">
-                              <img src={`data:image/png;base64,${item.imageData}`} alt={item.repoName} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                          <div className="aspect-video relative overflow-hidden bg-black">
+                              <img src={`data:image/png;base64,${item.imageData}`} alt={item.repoName} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                               {item.is3D && (
-                                  <div className="absolute top-2 right-2 bg-fuchsia-500/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/10">3D</div>
+                                  <div className="absolute top-2 right-2 bg-black/80 text-white text-[9px] font-bold px-1.5 py-0.5 rounded border border-white/10">3D</div>
                               )}
                           </div>
                           <div className="p-3">
                               <p className="text-xs font-bold text-white truncate font-mono">{item.repoName}</p>
-                              <p className="text-[10px] text-slate-500 mt-1">{item.style}</p>
+                              <p className="text-[10px] text-zinc-500 mt-1">{item.style}</p>
                           </div>
                       </button>
                   ))}

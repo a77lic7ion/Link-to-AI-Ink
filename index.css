@@ -4,69 +4,69 @@
 
 @layer base {
   body {
-    background-color: #030303; /* Deepest black */
+    background-color: #000000; /* True Black */
     background-image: 
-      /* Top-center violet glow */
-      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
-      /* Bottom-left subtle emerald */
-      radial-gradient(circle at 0% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 30%),
-      /* Top-right subtle pink */
-      radial-gradient(circle at 100% 10%, rgba(236, 72, 153, 0.05) 0%, transparent 30%),
-      /* Grid Pattern */
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      /* Subtle white grid */
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      /* Top Spotlight */
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+    background-size: 50px 50px, 50px 50px, 100% 100%;
+    background-position: center top;
     background-attachment: fixed;
-    color: #e2e8f0;
+    color: #e4e4e7; /* Zinc-200 */
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
+  /* "Carbon" Panel - Darker, less blur, sharper border */
   .glass-panel {
-    @apply bg-[#080808]/60 backdrop-blur-xl border border-white/[0.08] shadow-xl;
+    @apply bg-[#09090b]/80 backdrop-blur-md border border-white/[0.08] shadow-2xl;
     box-shadow: 
-      0 0 0 1px rgba(255, 255, 255, 0.02), 
-      0 20px 40px -20px rgba(0, 0, 0, 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      0 0 0 1px rgba(0,0,0,1), /* Inner black ring for definition */
+      0 20px 50px -10px rgba(0, 0, 0, 0.9);
   }
   
+  /* Input fields that recede into the background */
   .glass-input {
-    @apply bg-[#0a0a0a]/80 border border-white/10 text-white placeholder:text-slate-600 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/40 transition-all rounded-xl shadow-inner;
+    @apply bg-[#000000] border border-white/10 text-white placeholder:text-zinc-600 focus:border-white/30 focus:ring-1 focus:ring-white/30 transition-all rounded-lg shadow-inner;
   }
 
   .text-stroke-thin {
-    -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+    -webkit-text-stroke: 1px rgba(255,255,255,0.2);
     color: transparent;
+  }
+  
+  /* High contrast button hover */
+  .btn-primary-hover {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)];
   }
 }
 
-/* Custom scrollbar for technical feel */
+/* Scrollbar - Minimal and Dark */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #030303;
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: #27272a; /* Zinc-800 */
   border-radius: 3px;
-  border: 1px solid #030303;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+  background: #3f3f46; /* Zinc-700 */
 }
 
-/* Animation Utilities */
+/* Animations */
 .animate-in {
   animation-fill-mode: forwards;
 }
 
-.shadow-neon-violet {
-    box-shadow: 0 0 20px -5px rgba(139, 92, 246, 0.3);
-}
-
-.shadow-neon-emerald {
-    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+/* Glow Utilities */
+.glow-text-white {
+  text-shadow: 0 0 20px rgba(255,255,255,0.5);
 }

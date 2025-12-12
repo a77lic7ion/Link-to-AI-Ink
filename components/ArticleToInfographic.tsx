@@ -171,7 +171,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
       </div>
 
       {/* Input Section */}
-      <div className="glass-panel rounded-3xl p-6 md:p-10 space-y-8 relative z-10">
+      <div className="glass-panel rounded-3xl p-6 md:p-10 space-y-8 relative z-10 shadow-neon-emerald">
          <form id="article-form" onSubmit={handleGenerate} className="space-y-8">
             <div className="space-y-4">
                 <label className="text-xs text-emerald-400 font-mono tracking-wider flex items-center gap-2">
@@ -301,8 +301,8 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
 
       {/* Result Section */}
       {imageData && !loading && (
-        <div className="glass-panel rounded-3xl p-1.5 animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-4">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 mb-1.5 bg-slate-950/30 rounded-t-2xl">
+        <div className="glass-panel rounded-3xl p-1.5 animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-4 shadow-xl">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 mb-1.5 bg-white/[0.02] rounded-t-2xl">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
                   <Sparkles className="w-4 h-4 text-emerald-400" /> Generated_Result
                 </h3>
@@ -319,28 +319,28 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                     </a>
                 </div>
             </div>
-            <div className="rounded-2xl overflow-hidden bg-[#eef8fe] relative group">
+            <div className="rounded-2xl overflow-hidden bg-[#eef8fe] relative group min-h-[400px] flex items-center justify-center">
                  {selectedStyle === "Dark Mode Tech" && <div className="absolute inset-0 bg-slate-950 pointer-events-none mix-blend-multiply" />}
                 <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <img src={`data:image/png;base64,${imageData}`} alt="Generated Infographic" className="w-full h-auto object-contain max-h-[800px] mx-auto relative z-10" />
             </div>
 
             {/* Refinement Station */}
-            <div className="bg-slate-900/50 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 mx-4 border border-white/5">
+            <div className="bg-[#0a0a0a]/80 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 mx-4 border border-white/10 shadow-lg mb-4">
                 <div className="flex items-center gap-2 text-slate-400 shrink-0">
-                    <Sliders className="w-5 h-5" />
-                    <span className="text-xs font-mono uppercase tracking-wider">Refine_Output</span>
+                    <Sliders className="w-5 h-5 text-emerald-400" />
+                    <span className="text-xs font-mono uppercase tracking-wider text-slate-300">Refine_Output</span>
                 </div>
                 <input 
                     type="text" 
                     value={refinementPrompt}
                     onChange={(e) => setRefinementPrompt(e.target.value)}
                     placeholder="e.g. 'Use more vibrant colors' or 'Simplify the text'"
-                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500/50 font-mono"
+                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 font-mono transition-all"
                 />
                 <button 
                     onClick={handleGenerate}
-                    className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-emerald shrink-0"
+                    className="px-6 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-emerald shrink-0"
                 >
                     <RefreshCw className="w-3 h-3" /> Regenerate
                 </button>

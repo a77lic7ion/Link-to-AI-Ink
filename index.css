@@ -6,44 +6,53 @@
   body {
     background-color: #030303; /* Deepest black */
     background-image: 
-      /* Subtle radial glows for atmosphere */
-      radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.08) 0%, transparent 40%), 
-      radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+      /* Top-center violet glow */
+      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
+      /* Bottom-left subtle emerald */
+      radial-gradient(circle at 0% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 30%),
+      /* Top-right subtle pink */
+      radial-gradient(circle at 100% 10%, rgba(236, 72, 153, 0.05) 0%, transparent 30%),
       /* Grid Pattern */
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-attachment: fixed;
     color: #e2e8f0;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-[#0a0a0a]/70 backdrop-blur-2xl border border-white/[0.06] shadow-xl;
+    @apply bg-[#080808]/60 backdrop-blur-xl border border-white/[0.08] shadow-xl;
     box-shadow: 
-      0 0 0 1px rgba(255, 255, 255, 0.03), 
-      0 10px 30px -10px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 255, 255, 0.02), 
+      0 20px 40px -20px rgba(0, 0, 0, 0.8),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   
   .glass-input {
-    @apply bg-black/40 border border-white/10 text-white placeholder:text-slate-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all rounded-xl;
+    @apply bg-[#0a0a0a]/80 border border-white/10 text-white placeholder:text-slate-600 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/40 transition-all rounded-xl shadow-inner;
+  }
+
+  .text-stroke-thin {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+    color: transparent;
   }
 }
 
 /* Custom scrollbar for technical feel */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #030303;
 }
 ::-webkit-scrollbar-thumb {
   background: #262626;
-  border-radius: 4px;
-  border: 2px solid #050505;
+  border-radius: 3px;
+  border: 1px solid #030303;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #404040;
@@ -54,15 +63,10 @@
   animation-fill-mode: forwards;
 }
 
-/* Noise overlay if desired in future, minimal for now */
-.bg-noise {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+.shadow-neon-violet {
+    box-shadow: 0 0 20px -5px rgba(139, 92, 246, 0.3);
+}
+
+.shadow-neon-emerald {
+    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
 }

@@ -268,7 +268,7 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
 
       {/* Input Section */}
       <div className="max-w-xl mx-auto relative z-10">
-        <form id="repo-form" onSubmit={handleAnalyze} className="glass-panel rounded-2xl p-2 transition-all focus-within:ring-1 focus-within:ring-violet-500/50 focus-within:border-violet-500/50">
+        <form id="repo-form" onSubmit={handleAnalyze} className="glass-panel rounded-2xl p-2 transition-all focus-within:ring-1 focus-within:ring-violet-500/50 focus-within:border-violet-500/50 shadow-neon-violet">
           <div className="flex items-center">
              <div className="pl-3 text-slate-500">
                 <Command className="w-5 h-5" />
@@ -364,8 +364,8 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 2D Infographic Card */}
-              <div className="glass-panel rounded-3xl p-1.5">
-                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 gap-2">
+              <div className="glass-panel rounded-3xl p-1.5 shadow-xl">
+                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 gap-2 bg-white/[0.02] rounded-t-2xl">
                     <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
                       <Layers className="w-4 h-4 text-violet-400" /> Flow_Diagram
                     </h3>
@@ -382,7 +382,7 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
                       </a>
                     </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden bg-[#eef8fe] relative group border border-slate-200/10">
+                <div className="rounded-2xl overflow-hidden bg-[#eef8fe] relative group border border-slate-200/10 min-h-[300px] flex items-center justify-center">
                     {selectedStyle === "Neon Cyberpunk" && <div className="absolute inset-0 bg-slate-950 pointer-events-none mix-blend-multiply" />}
                     <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     <img src={`data:image/png;base64,${infographicData}`} alt="Repository Flow Diagram" className="w-full h-auto object-cover transition-opacity relative z-10" />
@@ -390,8 +390,8 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
               </div>
 
               {/* 3D Infographic Card */}
-              <div className="glass-panel rounded-3xl p-1.5 flex flex-col">
-                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 shrink-0 gap-2">
+              <div className="glass-panel rounded-3xl p-1.5 flex flex-col shadow-xl">
+                 <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 shrink-0 gap-2 bg-white/[0.02] rounded-t-2xl">
                     <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
                       <Box className="w-4 h-4 text-fuchsia-400" /> Holographic_Model
                     </h3>
@@ -411,7 +411,7 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
                     )}
                 </div>
                 
-                <div className="flex-1 rounded-2xl overflow-hidden bg-slate-950/30 relative flex items-center justify-center min-h-[300px] group">
+                <div className="flex-1 rounded-2xl overflow-hidden bg-slate-950/30 relative flex items-center justify-center min-h-[300px] group border border-white/5">
                   {infographic3DData ? (
                       <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
                          <div className="absolute inset-0 bg-slate-950/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
@@ -427,7 +427,7 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
                         <p className="text-slate-500 font-mono text-xs">Render tabletop perspective?</p>
                         <button 
                           onClick={handleGenerate3D}
-                          className="px-5 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-xl font-semibold transition-all flex items-center gap-2 font-mono text-sm"
+                          className="px-5 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-xl font-semibold transition-all flex items-center gap-2 font-mono text-sm shadow-[0_0_15px_rgba(217,70,239,0.1)] hover:shadow-[0_0_20px_rgba(217,70,239,0.3)]"
                         >
                           <Sparkles className="w-4 h-4" />
                           GENERATE_MODEL
@@ -439,21 +439,21 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
           </div>
 
           {/* Refinement Station */}
-          <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 border border-white/5 bg-white/5">
+          <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 border border-white/10 bg-[#0a0a0a]/80 shadow-lg">
              <div className="flex items-center gap-2 text-slate-400 shrink-0">
-                 <Sliders className="w-5 h-5" />
-                 <span className="text-xs font-mono uppercase tracking-wider">Refine_Output</span>
+                 <Sliders className="w-5 h-5 text-violet-400" />
+                 <span className="text-xs font-mono uppercase tracking-wider text-slate-300">Refine_Output</span>
              </div>
              <input 
                 type="text" 
                 value={refinementPrompt}
                 onChange={(e) => setRefinementPrompt(e.target.value)}
                 placeholder="e.g. 'Focus on the authentication flow' or 'Make it darker'"
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-violet-500/50 font-mono"
+                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 font-mono transition-all"
              />
              <button 
                 onClick={handleRegenerate}
-                className="px-4 py-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-violet shrink-0"
+                className="px-6 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-lg font-medium transition-all flex items-center gap-2 font-mono text-xs uppercase tracking-wider hover:shadow-neon-violet shrink-0"
              >
                  <RefreshCw className="w-3 h-3" /> Regenerate
              </button>
